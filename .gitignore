@@ -17,6 +17,9 @@ Thumbs.db
 *.oxide.tmp
 oxide_data/
 
+# Debian build staging
+dist/deb-pkg/
+
 # Node / WebExtension build artifacts
 browser-extension/dist/
 browser-extension/node_modules/

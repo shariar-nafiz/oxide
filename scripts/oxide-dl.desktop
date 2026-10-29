@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Oxide
+GenericName=Download Manager
+Comment=High-performance dynamic multi-segment download manager
+Exec=/usr/bin/oxide-dl
+Icon=oxide-dl
+Terminal=false
+Type=Application
+Categories=Network;FileTransfer;
+StartupNotify=true
