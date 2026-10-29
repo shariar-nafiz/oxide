@@ -1,5 +1,8 @@
 use crate::types::ProbeInfo;
-use reqwest::header::{HeaderMap, HeaderName, HeaderValue, ACCEPT_RANGES, CONTENT_DISPOSITION, CONTENT_LENGTH, CONTENT_TYPE, ETAG, RANGE};
+use reqwest::header::{
+    HeaderMap, HeaderName, HeaderValue, ACCEPT_RANGES, CONTENT_DISPOSITION, CONTENT_LENGTH,
+    CONTENT_TYPE, ETAG, LAST_MODIFIED, RANGE,
+};
 use std::collections::HashMap;
 use std::str::FromStr;
 use thiserror::Error;
@@ -67,6 +70,11 @@ pub async fn probe_url(url_str: &str, custom_headers: &HashMap<String, String>) 
     }
 
     let etag = resp.headers().get(ETAG).and_then(|v| v.to_str().ok()).map(|s| s.to_string());
+    let last_modified = resp
+        .headers()
+        .get(LAST_MODIFIED)
+        .and_then(|v| v.to_str().ok())
+        .map(|s| s.to_string());
     let content_type = resp.headers().get(CONTENT_TYPE).and_then(|v| v.to_str().ok()).map(|s| s.to_string());
 
     let filename = extract_filename(&final_url, resp.headers().get(CONTENT_DISPOSITION));
@@ -78,6 +86,7 @@ pub async fn probe_url(url_str: &str, custom_headers: &HashMap<String, String>) 
         content_length,
         supports_ranges,
         etag,
+        last_modified,
         content_type,
     })
 }

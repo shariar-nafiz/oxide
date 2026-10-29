@@ -15,12 +15,13 @@ members = [
 [workspace.package]
 version = "0.1.0"
 edition = "2021"
-authors = ["Oxide Contributors"]
-license = "MIT OR Apache-2.0"
-repository = "https://github.com/shariarunix/oxide-dl"
+authors = ["Md Shariar"]
+license = "MIT"
+repository = "https://github.com/shariar-nafiz/oxide"
 
 [workspace.dependencies]
 tokio = { version = "1.40", features = ["full"] }
+tokio-util = { version = "0.7", features = ["rt"] }
 reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "stream", "json"] }
 futures-util = "0.3"
 serde = { version = "1.0", features = ["derive"] }
@@ -32,9 +33,15 @@ url = "2.5"
 bytes = "1.7"
 directories = "5.0"
 redb = "2.1"
+rusqlite = "0.32"
+sha2 = "0.10"
+hex = "0.4"
+uuid = { version = "1.10", features = ["v4", "serde"] }
 parking_lot = "0.12"
 async-trait = "0.1"
 interprocess = { version = "2.2", features = ["tokio"] }
+axum = { version = "0.7", features = ["ws", "macros"] }
+tower-http = { version = "0.6", features = ["cors", "fs"] }
 
 # Size, memory and link-time optimizations
 [profile.release]

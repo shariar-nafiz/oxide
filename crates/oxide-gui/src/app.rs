@@ -236,6 +236,7 @@ fn render_download_row(ui: &mut egui::Ui, item: &UiDownloadItem, selected_id: &m
             }
         }
         DownloadStatus::Completed => "Completed".into(),
+        DownloadStatus::Assembling => "Verifying...".into(),
         DownloadStatus::Paused => "Paused".into(),
         DownloadStatus::Connecting => "Connecting...".into(),
         DownloadStatus::Queued => "Queued".into(),

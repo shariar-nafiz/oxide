@@ -82,21 +82,24 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 headers: HashMap::new(),
                 max_segments: Some(connections),
                 speed_limit_bps: if limit > 0 { Some(limit) } else { None },
+                queue_id: None,
+                expected_sha256: None,
             };
 
             let id = format!("dl-{}", std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH)?.as_millis());
             let task = DownloadTask::create(id, request, save_dir).await?;
+            let probe = task.probe.read().clone();
 
-            println!("File Name: {}", task.probe.filename);
-            if let Some(total) = task.probe.content_length {
+            println!("File Name: {}", probe.filename);
+            if let Some(total) = probe.content_length {
                 println!("File Size: {:.2} MB ({} bytes)", total as f64 / 1_048_576.0, total);
             } else {
                 println!("File Size: Unknown (Streaming)");
             }
-            println!("Multi-Segment Support: {}", if task.probe.supports_ranges { "Yes" } else { "No" });
+            println!("Multi-Segment Support: {}", if probe.supports_ranges { "Yes" } else { "No" });
             println!("Destination: {}\n", task.target_path.display());
 
-            let pb = if let Some(total) = task.probe.content_length {
+            let pb = if let Some(total) = probe.content_length {
                 let pb = ProgressBar::new(total);
                 pb.set_style(
                     ProgressStyle::default_bar()
