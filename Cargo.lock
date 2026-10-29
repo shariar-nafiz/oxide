@@ -2823,6 +2823,8 @@ dependencies = [
  "oxide-core",
  "oxide-ipc",
  "oxide-os",
+ "oxide-spider",
+ "oxide-stream",
  "parking_lot",
  "tokio",
  "tracing",

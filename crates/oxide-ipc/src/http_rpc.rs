@@ -8,7 +8,7 @@ use axum::{
         Path, Query, State,
     },
     http::StatusCode,
-    response::{Html, IntoResponse, Json},
+    response::{IntoResponse, Json},
     routing::{delete, get, post},
     Router,
 };
@@ -23,8 +23,6 @@ use std::time::Duration;
 use tower_http::cors::{Any, CorsLayer};
 use tracing::{error, info};
 
-const EMBEDDED_UI_HTML: &str = include_str!("../../../ui/index.html");
-
 #[derive(Clone)]
 pub struct HttpRpcState {
     pub manager: DownloadManager,
@@ -35,7 +33,7 @@ pub struct DeleteQuery {
     pub delete_file: Option<bool>,
 }
 
-/// Starts the local HTTP REST + WebSocket RPC and Live Preview server on `127.0.0.1:46890`.
+/// Starts the local JSON + WebSocket RPC bridge on `127.0.0.1:46890` for browser extension & IPC integration.
 pub async fn start_http_rpc_server(manager: DownloadManager, port: u16) {
     let state = HttpRpcState { manager };
 
@@ -45,7 +43,6 @@ pub async fn start_http_rpc_server(manager: DownloadManager, port: u16) {
         .allow_headers(Any);
 
     let app = Router::new()
-        .route("/", get(serve_live_ui))
         .route("/api/state", get(get_full_state))
         .route("/api/downloads", get(list_downloads).post(add_download))
         .route("/api/downloads/batch", post(add_batch_wildcard))
@@ -68,10 +65,7 @@ pub async fn start_http_rpc_server(manager: DownloadManager, port: u16) {
     let addr = SocketAddr::from(([127, 0, 0, 1], port));
     match tokio::net::TcpListener::bind(addr).await {
         Ok(listener) => {
-            info!(
-                "Oxide HTTP/WebSocket RPC & Live UI Preview listening on http://{}",
-                addr
-            );
+            info!("Oxide JSON/WS RPC Server listening on http://{}", addr);
             if let Err(e) = axum::serve(listener, app).await {
                 error!("HTTP RPC server error: {}", e);
             }
@@ -80,14 +74,6 @@ pub async fn start_http_rpc_server(manager: DownloadManager, port: u16) {
             error!("Failed to bind HTTP RPC server on {}: {}", addr, e);
         }
     }
-}
-
-async fn serve_live_ui() -> Html<String> {
-    // On development time, read directly from `ui/index.html` if present on disk so edits reflect live without recompiling!
-    if let Ok(disk_html) = std::fs::read_to_string("ui/index.html") {
-        return Html(disk_html);
-    }
-    Html(EMBEDDED_UI_HTML.to_string())
 }
 
 fn build_full_state(manager: &DownloadManager) -> FullDaemonState {
@@ -273,7 +259,7 @@ async fn ws_handler(
 }
 
 async fn handle_ws_client(mut socket: WebSocket, manager: DownloadManager) {
-    let mut ticker = tokio::time::interval(Duration::from_millis(100)); // 10Hz real-time segment progress
+    let mut ticker = tokio::time::interval(Duration::from_millis(100));
     loop {
         ticker.tick().await;
         let payload = build_full_state(&manager);

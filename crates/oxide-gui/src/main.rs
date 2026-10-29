@@ -1,4 +1,5 @@
 mod app;
+mod theme;
 mod tray;
 
 use app::OxideApp;
@@ -12,14 +13,12 @@ use tray::TrayManager;
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tracing_subscriber::fmt::init();
 
-    let args: Vec<String> = std::env::args().collect();
-    let headless = args.iter().any(|a| a == "--headless" || a == "--daemon");
-
     let paths = OxidePaths::new();
     paths.ensure_directories()?;
 
     let db_path = paths.data_dir().join("oxide_state.db");
     let db = SqliteStore::open(&db_path)?;
+    let default_save_dir = paths.downloads_dir().to_string_lossy().to_string();
     let manager = DownloadManager::new(db, paths.downloads_dir().clone())?;
 
     // 1. Spawn Queue & Retry Scheduler
@@ -32,21 +31,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let _ = server.start_with_manager(ipc_mgr).await;
     });
 
-    // 3. Spawn Local HTTP + 10Hz WebSocket RPC & Live Preview Server on 127.0.0.1:46890
-    let http_mgr = manager.clone();
+    // 3. Spawn Local JSON/WS RPC Server on 127.0.0.1:46890 (for Browser Extension)
+    let rpc_mgr = manager.clone();
     tokio::spawn(async move {
-        start_http_rpc_server(http_mgr, 46890).await;
+        start_http_rpc_server(rpc_mgr, 46890).await;
     });
-
-    println!("Oxide Download Manager Daemon started.");
-    println!("SQLite State DB:      {}", db_path.display());
-    println!("Live UI & RPC Server: http://127.0.0.1:46890");
-
-    if headless {
-        println!("Running in headless daemon + live web UI mode on http://127.0.0.1:46890 ...");
-        tokio::signal::ctrl_c().await?;
-        return Ok(());
-    }
 
     // On Linux, initialize GTK for system tray (tray-icon/libayatana-appindicator)
     #[cfg(target_os = "linux")]
@@ -67,9 +56,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let native_options = eframe::NativeOptions {
         viewport: eframe::egui::ViewportBuilder::default()
-            .with_title("Oxide Download Manager — Modern IDM Engine")
-            .with_inner_size(Vec2::new(1120.0, 680.0))
-            .with_min_inner_size(Vec2::new(820.0, 480.0)),
+            .with_title("Oxide Download Manager — Rust Native IDM Engine")
+            .with_inner_size(Vec2::new(1240.0, 760.0))
+            .with_min_inner_size(Vec2::new(960.0, 560.0)),
         ..Default::default()
     };
 
@@ -77,7 +66,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     eframe::run_native(
         "Oxide Download Manager",
         native_options,
-        Box::new(move |_cc| Ok(Box::new(OxideApp::new(gui_manager)))),
+        Box::new(move |_cc| Ok(Box::new(OxideApp::new(gui_manager, default_save_dir)))),
     )?;
 
     Ok(())
