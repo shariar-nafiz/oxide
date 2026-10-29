@@ -33,6 +33,10 @@ impl SegmentCoordinator {
         }
     }
 
+    pub fn total_size(&self) -> Option<u64> {
+        self.total_size
+    }
+
     pub fn total_downloaded(&self) -> u64 {
         self.total_downloaded.load(Ordering::Relaxed)
     }

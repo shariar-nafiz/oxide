@@ -3,6 +3,7 @@ use tray_icon::{
     Icon, TrayIcon, TrayIconBuilder,
 };
 
+#[allow(dead_code)]
 pub enum TrayAction {
     OpenManager,
     AddDownload,
@@ -11,6 +12,7 @@ pub enum TrayAction {
     Quit,
 }
 
+#[allow(dead_code)]
 pub struct TrayManager {
     _tray_icon: TrayIcon,
     menu_open_id: String,
@@ -63,6 +65,7 @@ impl TrayManager {
     }
 
     /// Check for clicked tray menu items
+    #[allow(dead_code)]
     pub fn check_events(&self) -> Option<TrayAction> {
         if let Ok(event) = MenuEvent::receiver().try_recv() {
             if event.id.0 == self.menu_open_id {

@@ -45,7 +45,7 @@ pub async fn crawl_page(target_url: &str, filter: &SpiderFilter) -> Result<Vec<D
     let mut discovered = HashSet::new();
 
     // Fast regex-free HTML attribute scanning for href and src
-    for token in resp.split(|c| c == '"' || c == '\'' || c == ' ' || c == '<' || c == '>') {
+    for token in resp.split(['"', '\'', ' ', '<', '>']) {
         if token.starts_with("http://") || token.starts_with("https://") || token.starts_with('/') {
             if let Ok(resolved) = base.join(token) {
                 if filter.same_domain_only && resolved.host_str() != base.host_str() {

@@ -71,7 +71,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             connections,
             limit,
         } => {
-            println!("🚀 Oxide Dynamic Downloader");
+            println!("Oxide Dynamic Downloader");
             println!("Target URL: {}", url);
 
             let save_dir = dir.unwrap_or_else(|| paths.downloads_dir().clone());
@@ -139,7 +139,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             let downloaded = task.coordinator.total_downloaded();
             let avg_speed_mb = (downloaded as f64 / 1_048_576.0) / elapsed.max(0.001);
 
-            println!("\n✨ Download finished successfully in {:.2}s (Avg Speed: {:.2} MB/s)", elapsed, avg_speed_mb);
+            println!("\nDownload finished successfully in {:.2}s (Avg Speed: {:.2} MB/s)", elapsed, avg_speed_mb);
             println!("Saved to: {}", task.target_path.display());
         }
 
@@ -161,7 +161,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             let installed = install_browser_manifests(&binary)?;
             println!("Registered manifests for {} browser configuration paths:", installed.len());
             for p in installed {
-                println!("  ✓ {}", p.display());
+                println!("  [+] {}", p.display());
             }
             println!("\nBrowser integration setup complete!");
         }

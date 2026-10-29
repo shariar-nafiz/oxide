@@ -13,13 +13,31 @@ pub enum StoreError {
     #[error("Storage error: {0}")]
     Storage(#[from] StorageError),
     #[error("Transaction error: {0}")]
-    Tx(#[from] redb::TransactionError),
+    Tx(Box<redb::TransactionError>),
     #[error("Table error: {0}")]
-    Table(#[from] redb::TableError),
+    Table(Box<redb::TableError>),
     #[error("Commit error: {0}")]
-    Commit(#[from] redb::CommitError),
+    Commit(Box<redb::CommitError>),
     #[error("Serialization error: {0}")]
     Json(#[from] serde_json::Error),
+}
+
+impl From<redb::TransactionError> for StoreError {
+    fn from(err: redb::TransactionError) -> Self {
+        StoreError::Tx(Box::new(err))
+    }
+}
+
+impl From<redb::TableError> for StoreError {
+    fn from(err: redb::TableError) -> Self {
+        StoreError::Table(Box::new(err))
+    }
+}
+
+impl From<redb::CommitError> for StoreError {
+    fn from(err: redb::CommitError) -> Self {
+        StoreError::Commit(Box::new(err))
+    }
 }
 
 /// Persistent record of an in-progress or completed download

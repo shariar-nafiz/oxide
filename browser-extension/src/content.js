@@ -24,7 +24,7 @@
 
     const shadow = container.attachShadow({ mode: "closed" });
     const pill = document.createElement("button");
-    pill.textContent = "⚡ Download with Oxide";
+    pill.textContent = "Download with Oxide";
     pill.style.background = "rgba(18, 20, 24, 0.85)";
     pill.style.color = "#00d2ff";
     pill.style.border = "1px solid rgba(0, 210, 255, 0.4)";

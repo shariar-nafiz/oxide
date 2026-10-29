@@ -90,7 +90,7 @@ fn preallocate_file(file: &File, total_bytes: u64) -> Result<(), IoError> {
             // Fallback to setting file length if filesystem doesn't support fallocate
             file.set_len(total_bytes)?;
         }
-        return Ok(());
+        Ok(())
     }
 
     #[cfg(target_os = "macos")]

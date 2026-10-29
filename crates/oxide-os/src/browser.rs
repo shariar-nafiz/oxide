@@ -76,10 +76,8 @@ pub fn install_browser_manifests(binary_path: &Path) -> Result<Vec<PathBuf>, Man
 
         for dir in &chromium_dirs {
             let manifest_path = dir.join(format!("{}.json", NMH_HOST_NAME));
-            if let Ok(_) = std::fs::create_dir_all(dir) {
-                if std::fs::write(&manifest_path, &chromium_content).is_ok() {
-                    installed.push(manifest_path);
-                }
+            if std::fs::create_dir_all(dir).is_ok() && std::fs::write(&manifest_path, &chromium_content).is_ok() {
+                installed.push(manifest_path);
             }
         }
 
@@ -91,10 +89,8 @@ pub fn install_browser_manifests(binary_path: &Path) -> Result<Vec<PathBuf>, Man
 
         for dir in &gecko_dirs {
             let manifest_path = dir.join(format!("{}.json", NMH_HOST_NAME));
-            if let Ok(_) = std::fs::create_dir_all(dir) {
-                if std::fs::write(&manifest_path, &firefox_content).is_ok() {
-                    installed.push(manifest_path);
-                }
+            if std::fs::create_dir_all(dir).is_ok() && std::fs::write(&manifest_path, &firefox_content).is_ok() {
+                installed.push(manifest_path);
             }
         }
     }
@@ -114,10 +110,8 @@ pub fn install_browser_manifests(binary_path: &Path) -> Result<Vec<PathBuf>, Man
 
         for dir in &chromium_dirs {
             let manifest_path = dir.join(format!("{}.json", NMH_HOST_NAME));
-            if let Ok(_) = std::fs::create_dir_all(dir) {
-                if std::fs::write(&manifest_path, &chromium_content).is_ok() {
-                    installed.push(manifest_path);
-                }
+            if std::fs::create_dir_all(dir).is_ok() && std::fs::write(&manifest_path, &chromium_content).is_ok() {
+                installed.push(manifest_path);
             }
         }
 
@@ -127,10 +121,8 @@ pub fn install_browser_manifests(binary_path: &Path) -> Result<Vec<PathBuf>, Man
 
         for dir in &gecko_dirs {
             let manifest_path = dir.join(format!("{}.json", NMH_HOST_NAME));
-            if let Ok(_) = std::fs::create_dir_all(dir) {
-                if std::fs::write(&manifest_path, &firefox_content).is_ok() {
-                    installed.push(manifest_path);
-                }
+            if std::fs::create_dir_all(dir).is_ok() && std::fs::write(&manifest_path, &firefox_content).is_ok() {
+                installed.push(manifest_path);
             }
         }
     }

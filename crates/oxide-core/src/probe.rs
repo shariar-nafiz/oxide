@@ -97,8 +97,8 @@ fn extract_filename(url_str: &str, content_disp: Option<&HeaderValue>) -> String
 
     // 2. Try URL path segment
     if let Ok(parsed) = Url::parse(url_str) {
-        if let Some(segments) = parsed.path_segments() {
-            if let Some(last) = segments.last() {
+        if let Some(mut segments) = parsed.path_segments() {
+            if let Some(last) = segments.next_back() {
                 let decoded = urlencoding_decode(last);
                 if !decoded.is_empty() {
                     return decoded;

@@ -31,7 +31,6 @@ pub struct OxideApp {
     pub selected_item: Option<String>,
     pub new_url_input: String,
     pub show_add_modal: bool,
-    pub should_close_to_tray: bool,
 }
 
 impl OxideApp {
@@ -42,7 +41,6 @@ impl OxideApp {
             selected_item: None,
             new_url_input: String::new(),
             show_add_modal: false,
-            should_close_to_tray: false,
         }
     }
 }
@@ -124,9 +122,9 @@ impl eframe::App for OxideApp {
                 if let Some(item) = items.iter().find(|i| &i.id == sel_id) {
                     ui.separator();
                     ui.horizontal(|ui| {
-                        ui.label(egui::RichText::new(format!("Segment Inspector — {}", item.filename)).strong().size(13.0));
+                        ui.label(egui::RichText::new(format!("Segment Inspector - {}", item.filename)).strong().size(13.0));
                         ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                            if ui.small_button("✕ Close").clicked() {
+                            if ui.small_button("[X] Close").clicked() {
                                 self.selected_item = None;
                             }
                         });
@@ -149,12 +147,9 @@ impl eframe::App for OxideApp {
                     ui.add(egui::TextEdit::singleline(&mut self.new_url_input).hint_text("https://...").desired_width(f32::INFINITY));
                     ui.add_space(12.0);
                     ui.horizontal(|ui| {
-                        if ui.button(egui::RichText::new("Start Download").color(Color32::from_rgb(0, 210, 255))).clicked() {
-                            if !self.new_url_input.trim().is_empty() {
-                                // Add item hook
-                                self.new_url_input.clear();
-                                self.show_add_modal = false;
-                            }
+                        if ui.button(egui::RichText::new("Start Download").color(Color32::from_rgb(0, 210, 255))).clicked() && !self.new_url_input.trim().is_empty() {
+                            self.new_url_input.clear();
+                            self.show_add_modal = false;
                         }
                         if ui.button("Cancel").clicked() {
                             self.show_add_modal = false;
@@ -289,7 +284,7 @@ fn render_segment_stealing_map(ui: &mut egui::Ui, item: &UiDownloadItem) {
         ui.painter().rect_filled(dl_rect, Rounding::ZERO, hue_color);
 
         // Segment divider line
-        ui.painter().line_segment([Pos2::new(end_x, rect.min.y), Pos2::new(end_x, rect.max.y)], Stroke::new(1.0, Color32::from_rgb(15, 18, 22)));
+        ui.painter().line_segment([Pos2::new(end_x, rect.min.y), Pos2::new(end_x, rect.max.y)], Stroke::new(1.0_f32, Color32::from_rgb(15, 18, 22)));
     }
 
     ui.add_space(4.0);

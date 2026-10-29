@@ -1,7 +1,5 @@
 use crate::protocol::{IpcRequest, IpcResponse};
 use interprocess::local_socket::tokio::prelude::*;
-use interprocess::local_socket::traits::tokio::Listener as _;
-use interprocess::local_socket::traits::tokio::Stream as _;
 use interprocess::local_socket::{GenericNamespaced, ListenerOptions};
 use oxide_os::OxidePaths;
 use std::sync::Arc;
@@ -22,6 +20,12 @@ pub enum IpcError {
 /// Client used by oxide-nmh or CLI to talk to the background daemon
 pub struct IpcClient {
     endpoint: String,
+}
+
+impl Default for IpcClient {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl IpcClient {
@@ -61,6 +65,12 @@ impl IpcClient {
 /// Server running inside the background daemon
 pub struct IpcServer {
     endpoint: String,
+}
+
+impl Default for IpcServer {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl IpcServer {
