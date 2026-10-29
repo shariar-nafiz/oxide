@@ -1,0 +1,37 @@
+{
+  "manifest_version": 3,
+  "name": "Oxide Download Manager",
+  "version": "0.1.0",
+  "description": "Blazing-fast multi-segment dynamic download manager integration for Oxide",
+  "permissions": [
+    "downloads",
+    "webRequest",
+    "webRequestBlocking",
+    "nativeMessaging",
+    "storage",
+    "menus"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "scripts": ["src/background.js"]
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "oxide-dl@shariarunix",
+      "strict_min_version": "109.0"
+    }
+  },
+  "action": {
+    "default_popup": "src/popup/popup.html",
+    "default_title": "Oxide"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["src/content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}
