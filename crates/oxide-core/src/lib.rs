@@ -2,6 +2,7 @@ pub mod db;
 pub mod engine;
 pub mod limiter;
 pub mod probe;
+pub mod scheduler;
 pub mod segment;
 pub mod store;
 pub mod types;
@@ -10,6 +11,7 @@ pub use db::{DbError, SqliteStore};
 pub use engine::{compute_file_sha256, min_split_size, DownloadManager, DownloadTask, EngineError};
 pub use limiter::SpeedLimiter;
 pub use probe::{probe_url, HttpError};
+pub use scheduler::{expand_wildcard_url, is_within_schedule_window, QueueScheduler};
 pub use segment::{
     run_live_segment_worker, LiveSegment, SegmentCoordinator, WorkerError, MIN_SPLIT_SIZE,
 };
@@ -72,6 +74,30 @@ mod tests {
         assert_eq!(Category::from_filename("movie.mkv"), Category::Videos);
         assert_eq!(Category::from_filename("song.flac"), Category::Music);
         assert_eq!(Category::from_filename("paper.pdf"), Category::Documents);
+    }
+
+    #[test]
+    fn test_wildcard_batch_expansion() {
+        let numeric = expand_wildcard_url("https://site.com/file_[01-04].zip", None);
+        assert_eq!(
+            numeric,
+            vec![
+                "https://site.com/file_01.zip",
+                "https://site.com/file_02.zip",
+                "https://site.com/file_03.zip",
+                "https://site.com/file_04.zip",
+            ]
+        );
+
+        let alpha = expand_wildcard_url("https://site.com/mirror_[a-c]/data.bin", None);
+        assert_eq!(
+            alpha,
+            vec![
+                "https://site.com/mirror_a/data.bin",
+                "https://site.com/mirror_b/data.bin",
+                "https://site.com/mirror_c/data.bin",
+            ]
+        );
     }
 
     #[derive(Clone)]

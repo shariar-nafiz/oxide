@@ -8,6 +8,7 @@ license.workspace = true
 [dependencies]
 oxide-core = { path = "../oxide-core" }
 oxide-os = { path = "../oxide-os" }
+oxide-stream = { path = "../oxide-stream" }
 tokio.workspace = true
 interprocess.workspace = true
 serde.workspace = true
@@ -15,3 +16,6 @@ serde_json.workspace = true
 thiserror.workspace = true
 tracing.workspace = true
 bytes.workspace = true
+axum.workspace = true
+tower-http.workspace = true
+futures-util.workspace = true

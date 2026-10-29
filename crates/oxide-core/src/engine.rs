@@ -737,6 +737,44 @@ impl DownloadManager {
     pub fn get_task(&self, id: &str) -> Option<Arc<DownloadTask>> {
         self.tasks.read().get(id).cloned()
     }
+
+    pub async fn pause_all(&self) -> Result<(), EngineError> {
+        let tasks: Vec<Arc<DownloadTask>> = self.tasks.read().values().cloned().collect();
+        for task in tasks {
+            let status = *task.status_sync.read();
+            if status == DownloadStatus::Downloading || status == DownloadStatus::Connecting {
+                let _ = task.pause().await;
+            }
+        }
+        Ok(())
+    }
+
+    pub async fn resume_all(&self) -> Result<(), EngineError> {
+        let tasks: Vec<Arc<DownloadTask>> = self.tasks.read().values().cloned().collect();
+        for task in tasks {
+            let status = *task.status_sync.read();
+            if status == DownloadStatus::Paused || status == DownloadStatus::Queued {
+                let t = task.clone();
+                tokio::spawn(async move {
+                    let _ = t.start().await;
+                });
+            }
+        }
+        Ok(())
+    }
+
+    pub fn set_task_speed_limit(&self, id: &str, bps: u64) -> Result<(), EngineError> {
+        let task = self
+            .tasks
+            .read()
+            .get(id)
+            .cloned()
+            .ok_or_else(|| EngineError::Task(format!("Download {} not found", id)))?;
+        task.limiter.set_limit(bps);
+        task.request.write().speed_limit_bps = Some(bps);
+        task.persist_full_state()?;
+        Ok(())
+    }
 }
 
 /// Computes the hex-encoded SHA-256 digest of a file on disk.

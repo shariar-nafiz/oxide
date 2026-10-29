@@ -1,16 +1,52 @@
 mod app;
 mod tray;
 
-use app::{OxideApp, UiDownloadItem};
+use app::OxideApp;
 use eframe::egui::Vec2;
+use oxide_core::{DownloadManager, QueueScheduler, SqliteStore};
+use oxide_ipc::{start_http_rpc_server, IpcServer};
 use oxide_os::OxidePaths;
-use parking_lot::RwLock;
-use std::sync::Arc;
 use tray::TrayManager;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tracing_subscriber::fmt::init();
+
+    let args: Vec<String> = std::env::args().collect();
+    let headless = args.iter().any(|a| a == "--headless" || a == "--daemon");
+
+    let paths = OxidePaths::new();
+    paths.ensure_directories()?;
+
+    let db_path = paths.data_dir().join("oxide_state.db");
+    let db = SqliteStore::open(&db_path)?;
+    let manager = DownloadManager::new(db, paths.downloads_dir().clone())?;
+
+    // 1. Spawn Queue & Retry Scheduler
+    QueueScheduler::new(manager.clone()).spawn();
+
+    // 2. Spawn Local IPC Socket Server (for oxide-nmh / oxide-cli)
+    let ipc_mgr = manager.clone();
+    tokio::spawn(async move {
+        let server = IpcServer::new();
+        let _ = server.start_with_manager(ipc_mgr).await;
+    });
+
+    // 3. Spawn Local HTTP + 10Hz WebSocket RPC & Live Preview Server on 127.0.0.1:46890
+    let http_mgr = manager.clone();
+    tokio::spawn(async move {
+        start_http_rpc_server(http_mgr, 46890).await;
+    });
+
+    println!("Oxide Download Manager Daemon started.");
+    println!("SQLite State DB:      {}", db_path.display());
+    println!("Live UI & RPC Server: http://127.0.0.1:46890");
+
+    if headless {
+        println!("Running in headless daemon + live web UI mode on http://127.0.0.1:46890 ...");
+        tokio::signal::ctrl_c().await?;
+        return Ok(());
+    }
 
     // On Linux, initialize GTK for system tray (tray-icon/libayatana-appindicator)
     #[cfg(target_os = "linux")]
@@ -18,38 +54,30 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let _ = gtk::init();
     }
 
-    let paths = OxidePaths::new();
-    paths.ensure_directories()?;
-
-    let items = Arc::new(RwLock::new(Vec::<UiDownloadItem>::new()));
-
-    // Launch cross-platform tray controller
     let _tray = match TrayManager::new() {
         Ok(t) => Some(t),
         Err(e) => {
-            eprintln!("Tray initialization warning: {}. Running in standard window mode.", e);
+            eprintln!(
+                "Tray initialization warning: {}. Running in standard window mode.",
+                e
+            );
             None
         }
     };
 
-    println!("Oxide Download Manager Daemon started.");
-    println!("Running background event loop. Tray icon active.");
-
-    // Options for clean minimal native window
     let native_options = eframe::NativeOptions {
         viewport: eframe::egui::ViewportBuilder::default()
-            .with_title("Oxide Download Manager")
-            .with_inner_size(Vec2::new(760.0, 520.0))
-            .with_min_inner_size(Vec2::new(500.0, 350.0)),
+            .with_title("Oxide Download Manager — Modern IDM Engine")
+            .with_inner_size(Vec2::new(1120.0, 680.0))
+            .with_min_inner_size(Vec2::new(820.0, 480.0)),
         ..Default::default()
     };
 
-    // Run minimal eframe UI
-    let items_clone = items.clone();
+    let gui_manager = manager.clone();
     eframe::run_native(
         "Oxide Download Manager",
         native_options,
-        Box::new(|_cc| Ok(Box::new(OxideApp::new(items_clone)))),
+        Box::new(move |_cc| Ok(Box::new(OxideApp::new(gui_manager)))),
     )?;
 
     Ok(())

@@ -72,6 +72,46 @@ impl StreamPlaylist {
             segments,
         }
     }
+
+    /// Parses a DASH `.mpd` manifest (SegmentList / BaseURL / SegmentURL elements) into ordered segments.
+    pub fn parse_mpd(content: &str, base_url: &str) -> Self {
+        let mut segments = Vec::new();
+        let mut sequence = 0usize;
+        let prefix = base_url
+            .rsplit_once('/')
+            .map(|(p, _)| p)
+            .unwrap_or(base_url);
+
+        for line in content.lines() {
+            let trimmed = line.trim();
+            if let Some(idx) = trimmed.find("media=\"") {
+                let rest = &trimmed[idx + 7..];
+                if let Some(end_idx) = rest.find('"') {
+                    let rel = &rest[..end_idx];
+                    if !rel.contains('$') {
+                        let full_uri = if rel.starts_with("http://") || rel.starts_with("https://")
+                        {
+                            rel.to_string()
+                        } else {
+                            format!("{}/{}", prefix, rel.trim_start_matches('/'))
+                        };
+                        segments.push(StreamSegment {
+                            sequence,
+                            duration_secs: 4.0,
+                            uri: full_uri,
+                        });
+                        sequence += 1;
+                    }
+                }
+            }
+        }
+
+        Self {
+            target_duration: 4.0,
+            is_live: false,
+            segments,
+        }
+    }
 }
 
 #[cfg(test)]

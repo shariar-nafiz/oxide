@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "Oxide Download Manager Integration",
+  "version": "0.1.0",
+  "description": "Intercepts browser downloads, sniffs HLS/DASH media streams, and accelerates transfers with Oxide IDM Engine.",
+  "permissions": [
+    "downloads",
+    "webRequest",
+    "cookies",
+    "contextMenus",
+    "nativeMessaging",
+    "tabs",
+    "scripting",
+    "storage"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "src/background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["src/content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}
