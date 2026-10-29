@@ -1,0 +1,22 @@
+# Rust build artifacts
+target/
+**/*.rs.bk
+*.pdb
+
+# IDE and Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Oxide runtime state & temporary downloads
+*.oxide.part
+*.oxide.tmp
+oxide_data/
+
+# Node / WebExtension build artifacts
+browser-extension/dist/
+browser-extension/node_modules/

@@ -1,0 +1,15 @@
+[package]
+name = "oxide-os"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+thiserror.workspace = true
+tracing.workspace = true
+directories.workspace = true
+
+[target.'cfg(windows)'.dependencies]
+winreg = "0.52"
+windows-sys = { version = "0.59", features = ["Win32_Storage_FileSystem", "Win32_System_SystemInformation", "Win32_System_Power"] }
