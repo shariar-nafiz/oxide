@@ -23,3 +23,5 @@ dist/deb-pkg/
 # Node / WebExtension build artifacts
 browser-extension/dist/
 browser-extension/node_modules/
+
+*.exe
