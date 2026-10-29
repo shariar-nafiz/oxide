@@ -2613,6 +2613,7 @@ name = "oxide-gui"
 version = "0.1.0"
 dependencies = [
  "eframe",
+ "gtk",
  "notify-rust",
  "oxide-core",
  "oxide-ipc",

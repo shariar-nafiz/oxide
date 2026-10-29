@@ -12,6 +12,12 @@ use tray::TrayManager;
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tracing_subscriber::fmt::init();
 
+    // On Linux, initialize GTK for system tray (tray-icon/libayatana-appindicator)
+    #[cfg(target_os = "linux")]
+    {
+        let _ = gtk::init();
+    }
+
     let paths = OxidePaths::new();
     paths.ensure_directories()?;
 
